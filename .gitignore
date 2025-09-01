@@ -205,3 +205,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project-specific ignores
+debug_*.py
+test_*.py
+*_debug/
+*_debug_new/
+.prometheus_pipeline_state.json
+logs/
+*.log
+
+# Development files
+run_pipeline_fixed.bat
+run_pipeline_simple.bat
+TASK_*.md
+*_IMPLEMENTATION_SUMMARY.md
+
+# Generated output files (should be in results/ or figures/ folder)
+/*.png
+/*.pdf
+/*.jpg
+/*.jpeg
+
+# Keep figures folder for publication
+/figures/
+/results/

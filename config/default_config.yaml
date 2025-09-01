@@ -1,0 +1,46 @@
+# Default configuration for the Prometheus project
+# Unsupervised Discovery of Order Parameters in Spin Systems using VAEs
+
+# Ising model simulation parameters
+ising:
+  lattice_size: [32, 32]
+  temperature_range: [1.5, 3.0]
+  n_temperatures: 100
+  critical_temp: 2.269
+  n_configs_per_temp: 1000
+  equilibration_steps: 10000
+  measurement_steps: 1000
+
+# VAE model architecture parameters
+vae:
+  input_shape: [1, 32, 32]
+  latent_dim: 2
+  encoder_channels: [32, 64, 128]
+  decoder_channels: [128, 64, 32, 1]
+  kernel_sizes: [3, 3, 3]
+  beta: 1.0
+
+# Training pipeline parameters
+training:
+  batch_size: 128
+  learning_rate: 0.001
+  num_epochs: 100
+  optimizer: "Adam"
+  scheduler: "ReduceLROnPlateau"
+  early_stopping_patience: 10
+  checkpoint_interval: 10
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_output: true
+  console_output: true
+  log_dir: "logs"
+
+# Global settings
+seed: 42
+device: "auto"  # "auto", "cpu", "cuda"
+data_dir: "data"
+results_dir: "results"
+models_dir: "models"

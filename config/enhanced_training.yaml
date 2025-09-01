@@ -1,0 +1,70 @@
+# Enhanced Training Configuration
+# Demonstrates advanced training features for improved convergence
+
+# Ising model simulation parameters
+ising:
+  lattice_size: [32, 32]
+  temperature_range: [1.5, 3.0]
+  n_temperatures: 100
+  critical_temp: 2.269
+  n_configs_per_temp: 1000
+  equilibration_steps: 10000
+  measurement_steps: 1000
+
+# VAE model architecture
+vae:
+  input_shape: [1, 32, 32]
+  latent_dim: 2
+  encoder_channels: [32, 64, 128]
+  decoder_channels: [128, 64, 32, 1]
+  kernel_sizes: [3, 3, 3]
+  beta: 1.0
+
+# Enhanced training configuration
+training:
+  # Basic parameters
+  batch_size: 128
+  learning_rate: 1e-3
+  num_epochs: 100
+  optimizer: "Adam"
+  scheduler: "ReduceLROnPlateau"
+  early_stopping_patience: 15
+  checkpoint_interval: 10
+  
+  # Advanced learning rate scheduling
+  advanced_scheduler: "cosine_warm_restarts"
+  scheduler_params:
+    T_0: 10          # Initial restart period
+    T_mult: 2        # Restart period multiplier
+    eta_min: 1e-6    # Minimum learning rate
+    verbose: true
+  
+  # Data augmentation
+  use_augmentation: true
+  augmentation_type: "standard"  # "conservative", "standard", "aggressive"
+  augmentation_probability: 0.7
+  
+  # Ensemble training
+  use_ensemble: false
+  ensemble_size: 5
+  ensemble_base_seed: 42
+  
+  # Progressive training
+  use_progressive: false
+  progressive_stages: 3
+  progressive_epochs_ratio: [0.25, 0.25, 0.5]  # Fraction of epochs per stage
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_output: true
+  console_output: true
+  log_dir: "logs"
+
+# Global settings
+seed: 42
+device: "auto"
+data_dir: "data"
+results_dir: "results"
+models_dir: "models"

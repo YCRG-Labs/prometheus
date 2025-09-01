@@ -1,0 +1,46 @@
+# Example Configuration for Prometheus Phase Discovery Pipeline
+# This configuration demonstrates a small-scale experiment suitable for testing
+
+# Ising Model Configuration
+ising:
+  lattice_size: [16, 16]           # Small lattice for faster computation
+  temperature_range: [2.0, 2.5]   # Narrow range around critical temperature
+  n_temperatures: 5                # Few temperature points for quick testing
+  critical_temp: 2.269             # Theoretical critical temperature
+  n_configs_per_temp: 100          # Reduced number of configurations
+  equilibration_steps: 1000        # Fewer equilibration steps
+  measurement_steps: 500           # Fewer measurement steps
+
+# VAE Architecture Configuration  
+vae:
+  input_shape: [1, 16, 16]         # Matches lattice size
+  latent_dim: 2                    # 2D latent space for visualization
+  encoder_channels: [16, 32]       # Smaller network for faster training
+  decoder_channels: [32, 16, 1]    # Corresponding decoder
+  kernel_sizes: [3, 3]             # Standard kernel sizes
+  beta: 1.0                        # Standard VAE (β=1)
+
+# Training Configuration
+training:
+  batch_size: 32                   # Small batch size
+  num_epochs: 20                   # Few epochs for quick testing
+  learning_rate: 0.001             # Standard learning rate
+  weight_decay: 1e-5               # Light regularization
+  scheduler_patience: 5            # Early stopping patience
+  min_lr: 1e-6                     # Minimum learning rate
+  checkpoint_interval: 5           # Save checkpoints every 5 epochs
+  validation_split: 0.2            # 20% validation split
+
+# Logging Configuration
+logging:
+  level: INFO                      # Standard logging level
+  console_output: true             # Show logs in console
+  file_output: true                # Save logs to file
+  log_dir: logs                    # Log directory
+
+# General Configuration
+seed: 42                           # Random seed for reproducibility
+device: auto                       # Auto-detect GPU/CPU
+data_dir: data                     # Data output directory
+results_dir: results               # Results output directory
+models_dir: models                 # Model output directory

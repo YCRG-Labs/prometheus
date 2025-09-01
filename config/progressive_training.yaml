@@ -1,0 +1,68 @@
+# Progressive Training Configuration
+# Optimized for progressive resolution training
+
+# Ising model simulation parameters
+ising:
+  lattice_size: [32, 32]
+  temperature_range: [1.5, 3.0]
+  n_temperatures: 100
+  critical_temp: 2.269
+  n_configs_per_temp: 1000
+  equilibration_steps: 10000
+  measurement_steps: 1000
+
+# VAE model architecture
+vae:
+  input_shape: [1, 32, 32]
+  latent_dim: 2
+  encoder_channels: [32, 64, 128]
+  decoder_channels: [128, 64, 32, 1]
+  kernel_sizes: [3, 3, 3]
+  beta: 1.0
+
+# Progressive training configuration
+training:
+  # Basic parameters
+  batch_size: 128
+  learning_rate: 2e-3  # Higher initial LR for progressive training
+  num_epochs: 120  # More epochs for progressive stages
+  optimizer: "Adam"
+  scheduler: "ReduceLROnPlateau"
+  early_stopping_patience: 20
+  checkpoint_interval: 10
+  
+  # Cyclic LR works well with progressive training
+  advanced_scheduler: "cyclic"
+  scheduler_params:
+    base_lr: 1e-4
+    max_lr: 2e-3
+    step_size_up: 1000
+    mode: "triangular2"
+  
+  # Standard augmentation for progressive training
+  use_augmentation: true
+  augmentation_type: "standard"
+  augmentation_probability: 0.6
+  
+  # Disable ensemble training
+  use_ensemble: false
+  
+  # Progressive training configuration
+  use_progressive: true
+  progressive_stages: 4  # 8x8 -> 16x16 -> 24x24 -> 32x32
+  progressive_epochs_ratio: [0.2, 0.2, 0.3, 0.3]  # More time at higher resolutions
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_output: true
+  console_output: true
+  log_dir: "logs"
+
+# Global settings
+seed: 42
+device: "auto"
+data_dir: "data"
+results_dir: "results/progressive"
+models_dir: "models/progressive"

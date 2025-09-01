@@ -1,0 +1,67 @@
+# Ensemble Training Configuration
+# Optimized for ensemble training with multiple random initializations
+
+# Ising model simulation parameters
+ising:
+  lattice_size: [32, 32]
+  temperature_range: [1.5, 3.0]
+  n_temperatures: 100
+  critical_temp: 2.269
+  n_configs_per_temp: 1000
+  equilibration_steps: 10000
+  measurement_steps: 1000
+
+# VAE model architecture
+vae:
+  input_shape: [1, 32, 32]
+  latent_dim: 2
+  encoder_channels: [32, 64, 128]
+  decoder_channels: [128, 64, 32, 1]
+  kernel_sizes: [3, 3, 3]
+  beta: 1.0
+
+# Ensemble training configuration
+training:
+  # Basic parameters
+  batch_size: 128
+  learning_rate: 1e-3
+  num_epochs: 80  # Reduced per member
+  optimizer: "Adam"
+  scheduler: "ReduceLROnPlateau"
+  early_stopping_patience: 10
+  checkpoint_interval: 10
+  
+  # Advanced scheduling for ensemble stability
+  advanced_scheduler: "warmup_cosine"
+  scheduler_params:
+    warmup_epochs: 5
+    max_epochs: 80
+    eta_min: 1e-6
+  
+  # Conservative augmentation for ensemble diversity
+  use_augmentation: true
+  augmentation_type: "conservative"
+  augmentation_probability: 0.5
+  
+  # Ensemble configuration
+  use_ensemble: true
+  ensemble_size: 7
+  ensemble_base_seed: 42
+  
+  # Disable progressive training
+  use_progressive: false
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_output: true
+  console_output: true
+  log_dir: "logs"
+
+# Global settings
+seed: 42
+device: "auto"
+data_dir: "data"
+results_dir: "results/ensemble"
+models_dir: "models/ensemble"
