@@ -230,3 +230,4 @@ TASK_*.md
 # Keep figures folder for publication
 /figures/
 /results/
+/.kiro/

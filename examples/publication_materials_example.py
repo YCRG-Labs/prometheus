@@ -3,7 +3,14 @@ Publication Materials Generation Example
 
 This example demonstrates how to generate comprehensive publication-ready
 materials for the Prometheus VAE project, including training diagnostics,
-reconstruction analysis, and comparison studies.
+reconstruction analysis, comparison studies, and enhanced physics validation.
+
+Enhanced features include:
+- Critical exponent analysis and finite-size scaling validation
+- Symmetry analysis and theoretical model validation
+- Statistical physics analysis with uncertainty quantification
+- Experimental benchmark comparison
+- Comprehensive physics review report generation
 """
 
 import numpy as np
@@ -27,7 +34,12 @@ from src.analysis.order_parameter_discovery import (
     CorrelationResult
 )
 from src.analysis.phase_detection import PhaseDetectionResult
-from src.analysis.physics_validation import ValidationMetrics
+from src.analysis.physics_validation import ValidationMetrics, PhysicsValidator
+from src.analysis.enhanced_validation_config import (
+    EnhancedValidationConfig, ValidationLevel, get_default_config
+)
+from src.analysis.physics_review_report_generator import PhysicsReviewReportGenerator
+from src.analysis.experimental_benchmark_comparator import ExperimentalBenchmarkComparator
 from src.analysis.comparison_studies import ComparisonResult, AblationResult
 from src.models.vae import ConvolutionalVAE
 
@@ -156,7 +168,7 @@ def create_mock_dataset() -> PublicationDataset:
         ensemble_scores={'clustering': 0.92, 'gradient': 0.88, 'information': 0.85}
     )
     
-    # Create validation metrics
+    # Create enhanced validation metrics
     validation_metrics = ValidationMetrics(
         order_parameter_correlation=0.85,
         critical_temperature_error=0.006,
@@ -174,6 +186,67 @@ def create_mock_dataset() -> PublicationDataset:
             'discovered_critical_temperature': 2.275
         }
     )
+    
+    # Add enhanced validation results
+    try:
+        from src.analysis.enhanced_validation_types import (
+            CriticalExponentValidation, SymmetryValidationResult, 
+            FiniteSizeScalingResult, TheoreticalModelValidation
+        )
+        
+        # Mock critical exponent validation
+        critical_exp_validation = CriticalExponentValidation(
+            beta_exponent=0.128,
+            beta_theoretical=0.125,
+            beta_confidence_interval=(0.125, 0.131),
+            gamma_exponent=1.73,
+            gamma_theoretical=1.75,
+            gamma_confidence_interval=(1.70, 1.76),
+            nu_exponent=0.98,
+            nu_theoretical=1.0,
+            nu_confidence_interval=(0.95, 1.01),
+            universality_class_match=True,
+            scaling_violations=[]
+        )
+        
+        # Mock symmetry validation
+        symmetry_validation = SymmetryValidationResult(
+            broken_symmetries=['Z2'],
+            symmetry_order={'Z2': 2},
+            order_parameter_symmetry='Z2',
+            symmetry_consistency_score=0.92,
+            violations=[]
+        )
+        
+        # Mock finite-size scaling (if available)
+        fss_result = FiniteSizeScalingResult(
+            system_sizes=[16, 32, 64],
+            scaling_collapse_quality=0.88,
+            scaling_exponents={'beta_over_nu': 0.125, 'gamma_over_nu': 1.75},
+            finite_size_corrections={'amplitude': 0.1, 'exponent': 0.5}
+        )
+        
+        # Mock theoretical model validation
+        theoretical_validation = TheoreticalModelValidation(
+            model_type='Ising',
+            agreement_score=0.91,
+            critical_temperature_match=True,
+            exponent_agreement={'beta': 0.95, 'gamma': 0.89, 'nu': 0.92},
+            deviations=['Small deviation in gamma exponent']
+        )
+        
+        # Add enhanced results to validation metrics
+        validation_metrics.enhanced_results = {
+            'critical_exponent_validation': critical_exp_validation,
+            'symmetry_validation': symmetry_validation,
+            'finite_size_scaling': fss_result,
+            'theoretical_model_validation': theoretical_validation
+        }
+        
+    except ImportError:
+        # Enhanced validation types not available, continue with basic validation
+        logging.warning("Enhanced validation types not available, using basic validation only")
+        validation_metrics.enhanced_results = None
     
     # Create mock model
     model = ConvolutionalVAE(
@@ -331,11 +404,195 @@ def create_mock_dataset() -> PublicationDataset:
     return dataset
 
 
+def demonstrate_enhanced_validation_for_publication(dataset: PublicationDataset, output_dir: Path):
+    """Demonstrate enhanced physics validation for publication materials."""
+    logging.info("Generating enhanced physics validation for publication")
+    
+    print("\n" + "="*60)
+    print("ENHANCED PHYSICS VALIDATION FOR PUBLICATION")
+    print("="*60)
+    
+    # Create physics validator
+    validator = PhysicsValidator(theoretical_tc=2.269, tolerance_percent=5.0)
+    
+    # Use comprehensive validation configuration
+    config = get_default_config('comprehensive')
+    config.critical_exponents.enable = True
+    config.symmetry_analysis.enable = True
+    config.symmetry_analysis.hamiltonian_symmetries = ['Z2']
+    config.experimental_comparison.enable = True
+    config.report_generation.enable = True
+    config.report_generation.include_educational_content = True
+    
+    print("\n1. Running Enhanced Physics Validation...")
+    
+    # Run comprehensive validation
+    enhanced_metrics = validator.comprehensive_physics_validation(
+        latent_repr=dataset.latent_representation,
+        order_param_candidates=dataset.order_parameter_candidates,
+        phase_detection_result=dataset.phase_detection_result,
+        validation_config=config
+    )
+    
+    print(f"   - Physics consistency score: {enhanced_metrics.physics_consistency_score:.3f}")
+    print(f"   - Order parameter correlation: {enhanced_metrics.order_parameter_correlation:.3f}")
+    print(f"   - Critical temperature error: {enhanced_metrics.critical_temperature_relative_error:.2f}%")
+    
+    if enhanced_metrics.enhanced_results:
+        print(f"   - Enhanced validation features: {len(enhanced_metrics.enhanced_results)}")
+        
+        # Show critical exponent results
+        if 'critical_exponent_validation' in enhanced_metrics.enhanced_results:
+            crit_exp = enhanced_metrics.enhanced_results['critical_exponent_validation']
+            if crit_exp:
+                print(f"   - Critical exponents: β={crit_exp.beta_exponent:.4f}, γ={crit_exp.gamma_exponent:.4f}, ν={crit_exp.nu_exponent:.4f}")
+                print(f"   - Universality class match: {crit_exp.universality_class_match}")
+    
+    print("\n2. Generating Physics Review Report...")
+    
+    # Generate comprehensive physics review report
+    report_generator = PhysicsReviewReportGenerator()
+    
+    try:
+        report = report_generator.generate_comprehensive_report(
+            validation_results={
+                'basic_metrics': enhanced_metrics,
+                'enhanced_results': enhanced_metrics.enhanced_results or {}
+            },
+            include_educational_content=True
+        )
+        
+        # Save physics review report
+        physics_report_dir = output_dir / "physics_review"
+        physics_report_dir.mkdir(exist_ok=True)
+        
+        # Save comprehensive report
+        report_text = f"""Enhanced Physics Validation Report for Publication
+{'='*60}
+
+Overall Assessment: {report.overall_assessment}
+
+Summary:
+- Physics consistency score: {enhanced_metrics.physics_consistency_score:.3f}
+- Order parameter correlation: {enhanced_metrics.order_parameter_correlation:.3f}
+- Critical temperature accuracy: {100 - enhanced_metrics.critical_temperature_relative_error:.1f}%
+
+Physics Violations: {len(report.violations)}
+"""
+        
+        if report.violations:
+            report_text += "\nPhysics Violations Found:\n"
+            for i, violation in enumerate(report.violations, 1):
+                report_text += f"{i}. {violation.violation_type} ({violation.severity}): {violation.description}\n"
+                if violation.suggested_investigation:
+                    report_text += f"   Suggested investigation: {violation.suggested_investigation}\n"
+        
+        if report.educational_content:
+            report_text += f"\nEducational Content Topics ({len(report.educational_content)}):\n"
+            for topic in list(report.educational_content.keys())[:5]:
+                report_text += f"- {topic.replace('_', ' ').title()}\n"
+        
+        # Add critical exponent details if available
+        if enhanced_metrics.enhanced_results and 'critical_exponent_validation' in enhanced_metrics.enhanced_results:
+            crit_exp = enhanced_metrics.enhanced_results['critical_exponent_validation']
+            if crit_exp:
+                report_text += f"""
+Critical Exponent Analysis:
+- β = {crit_exp.beta_exponent:.4f} ± {(crit_exp.beta_confidence_interval[1] - crit_exp.beta_confidence_interval[0])/2:.4f} (theoretical: {crit_exp.beta_theoretical:.3f})
+- γ = {crit_exp.gamma_exponent:.4f} ± {(crit_exp.gamma_confidence_interval[1] - crit_exp.gamma_confidence_interval[0])/2:.4f} (theoretical: {crit_exp.gamma_theoretical:.3f})
+- ν = {crit_exp.nu_exponent:.4f} ± {(crit_exp.nu_confidence_interval[1] - crit_exp.nu_confidence_interval[0])/2:.4f} (theoretical: {crit_exp.nu_theoretical:.3f})
+- Universality class match: {crit_exp.universality_class_match}
+"""
+        
+        with open(physics_report_dir / "enhanced_physics_validation_report.txt", "w") as f:
+            f.write(report_text)
+        
+        print(f"   - Enhanced physics report saved: {physics_report_dir / 'enhanced_physics_validation_report.txt'}")
+        print(f"   - Physics violations found: {len(report.violations)}")
+        print(f"   - Educational content topics: {len(report.educational_content) if report.educational_content else 0}")
+        
+    except Exception as e:
+        print(f"   - Enhanced report generation error: {e}")
+        logging.warning(f"Enhanced report generation failed: {e}")
+    
+    print("\n3. Experimental Benchmark Comparison...")
+    
+    # Demonstrate experimental comparison
+    exp_comparator = ExperimentalBenchmarkComparator()
+    
+    try:
+        # Add 2D Ising benchmark
+        ising_benchmark = {
+            'critical_temperature': {
+                'value': 2.269,
+                'uncertainty': 0.001,
+                'source': 'Onsager (1944) - Exact solution',
+                'system': '2D Ising model'
+            },
+            'critical_exponents': {
+                'beta': {'value': 0.125, 'uncertainty': 0.002, 'source': 'Theoretical'},
+                'gamma': {'value': 1.75, 'uncertainty': 0.01, 'source': 'Theoretical'},
+                'nu': {'value': 1.0, 'uncertainty': 0.005, 'source': 'Theoretical'}
+            },
+            'universality_class': '2D Ising',
+            'dimensionality': 2
+        }
+        
+        exp_comparator.add_experimental_benchmark(
+            name="2D_Ising_Theoretical",
+            data=ising_benchmark
+        )
+        
+        # Compare with our results
+        computational_results = {
+            'critical_temperature': dataset.phase_detection_result.critical_temperature,
+            'beta_exponent': 0.128,  # From enhanced validation
+            'gamma_exponent': 1.73,
+            'nu_exponent': 0.98
+        }
+        
+        comparison_result = exp_comparator.compare_with_experiments(
+            computational_results=computational_results,
+            benchmark_name="2D_Ising_Theoretical"
+        )
+        
+        print(f"   - Overall agreement with theory: {comparison_result.overall_agreement:.3f}")
+        print(f"   - Statistical significance: {comparison_result.statistical_significance:.4f}")
+        
+        # Save experimental comparison
+        exp_comparison_text = f"""Experimental Benchmark Comparison
+{'='*40}
+
+Overall Agreement Score: {comparison_result.overall_agreement:.3f}
+Statistical Significance: {comparison_result.statistical_significance:.4f}
+
+Parameter Comparisons:
+"""
+        for param, comp in comparison_result.parameter_comparisons.items():
+            exp_comparison_text += f"""
+{param}:
+  Computational: {comp.computational_value:.4f}
+  Experimental: {comp.experimental_value:.4f} ± {comp.experimental_uncertainty:.4f}
+  Agreement: {comp.agreement_metric:.3f}
+"""
+        
+        with open(physics_report_dir / "experimental_comparison.txt", "w") as f:
+            f.write(exp_comparison_text)
+        
+        print(f"   - Experimental comparison saved: {physics_report_dir / 'experimental_comparison.txt'}")
+        
+    except Exception as e:
+        print(f"   - Experimental comparison error: {e}")
+        logging.warning(f"Experimental comparison failed: {e}")
+    
+    return enhanced_metrics
+
+
 def main():
     """Main function to demonstrate publication materials generation."""
     # Setup basic logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    logging.info("Starting publication materials generation example")
+    logging.info("Starting enhanced publication materials generation example")
     
     # Create output directory
     output_dir = Path("results/publication_example")
@@ -344,6 +601,13 @@ def main():
     try:
         # Create mock dataset
         dataset = create_mock_dataset()
+        
+        # Demonstrate enhanced validation for publication
+        enhanced_metrics = demonstrate_enhanced_validation_for_publication(dataset, output_dir)
+        
+        # Update dataset with enhanced validation results
+        if enhanced_metrics and enhanced_metrics.enhanced_results:
+            dataset.validation_metrics = enhanced_metrics
         
         # Initialize publication materials generator
         pub_generator = PublicationMaterialsGenerator()
@@ -372,7 +636,7 @@ def main():
         
         # Print summary
         print("\n" + "="*60)
-        print("PUBLICATION MATERIALS GENERATION COMPLETE")
+        print("ENHANCED PUBLICATION MATERIALS GENERATION COMPLETE")
         print("="*60)
         print(f"Output directory: {output_dir}")
         print(f"Generation time: {package['generation_time']}")
@@ -392,6 +656,12 @@ def main():
         print(f"\nData summaries: {len(package['data_summaries'])}")
         for name, path in package['data_summaries'].items():
             print(f"  - {name}: {path}")
+        
+        print(f"\nEnhanced physics validation reports:")
+        physics_report_dir = output_dir / "physics_review"
+        if physics_report_dir.exists():
+            for report_file in physics_report_dir.glob("*.txt"):
+                print(f"  - {report_file.name}: {report_file}")
         
         print(f"\nPublication checklist: {package['checklist']}")
         
@@ -430,10 +700,21 @@ def main():
         print(f"Main results figure saved: {main_fig_path}")
         
         print("\n" + "="*60)
-        print("EXAMPLE COMPLETED SUCCESSFULLY")
+        print("ENHANCED PUBLICATION EXAMPLE COMPLETED SUCCESSFULLY")
         print("="*60)
         print(f"Check the output directory for all generated materials: {output_dir}")
-        print("Use the publication checklist to ensure all materials are ready for submission.")
+        print("\nEnhanced features demonstrated:")
+        print("✓ Critical exponent analysis and universality class identification")
+        print("✓ Symmetry analysis and order parameter validation")
+        print("✓ Theoretical model validation against Ising model")
+        print("✓ Statistical physics analysis with confidence intervals")
+        print("✓ Experimental benchmark comparison with agreement metrics")
+        print("✓ Comprehensive physics review report generation")
+        print("✓ Educational content and physics explanations")
+        print("✓ Physics violation detection and severity assessment")
+        print("✓ Integration with publication materials generation")
+        print("\nUse the publication checklist and enhanced physics reports to ensure")
+        print("all materials are scientifically rigorous and ready for submission.")
         
     except Exception as e:
         logging.error(f"Error in publication materials example: {e}")

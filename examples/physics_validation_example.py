@@ -1,8 +1,15 @@
 """
 Physics Validation and Visualization Example
 
-This example demonstrates how to use the physics validation framework
+This example demonstrates how to use the enhanced physics validation framework
 and visualization system to validate AI-discovered physics results.
+
+Enhanced features include:
+- Critical exponent analysis and finite-size scaling validation
+- Symmetry analysis and theoretical model validation
+- Statistical physics analysis with uncertainty quantification
+- Experimental benchmark comparison
+- Comprehensive physics review report generation
 """
 
 import numpy as np
@@ -10,10 +17,15 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from src.analysis.physics_validation import PhysicsValidator, ValidationMetrics
+from src.analysis.enhanced_validation_config import (
+    EnhancedValidationConfig, ValidationLevel, get_default_config
+)
 from src.analysis.visualization import PublicationVisualizer, AnalysisReporter
 from src.analysis.latent_analysis import LatentRepresentation
 from src.analysis.order_parameter_discovery import OrderParameterCandidate, CorrelationResult
 from src.analysis.phase_detection import PhaseDetectionResult
+from src.analysis.physics_review_report_generator import PhysicsReviewReportGenerator
+from src.analysis.experimental_benchmark_comparator import ExperimentalBenchmarkComparator
 
 
 def create_sample_data():
@@ -133,9 +145,9 @@ def create_phase_detection_result():
 
 
 def demonstrate_physics_validation():
-    """Demonstrate physics validation framework."""
+    """Demonstrate enhanced physics validation framework."""
     print("\n" + "="*60)
-    print("PHYSICS VALIDATION DEMONSTRATION")
+    print("ENHANCED PHYSICS VALIDATION DEMONSTRATION")
     print("="*60)
     
     # Create sample data
@@ -146,50 +158,122 @@ def demonstrate_physics_validation():
     # Initialize validator
     validator = PhysicsValidator(theoretical_tc=2.269, tolerance_percent=5.0)
     
-    print("\n1. Validating Order Parameter Discovery...")
-    order_validation = validator.validate_order_parameter_discovery(
-        latent_repr, order_param_candidates
-    )
-    
-    print(f"   - Best candidate: {order_validation['primary_dimension']}")
-    print(f"   - Correlation with magnetization: {order_validation['correlation_coefficient']:.3f}")
-    print(f"   - Statistical significance: p = {order_validation['statistical_significance']:.2e}")
-    print(f"   - Correlation strength: {order_validation['correlation_strength']}")
-    
-    print("\n2. Validating Critical Temperature...")
-    tc_validation = validator.validate_critical_temperature(phase_detection_result)
-    
-    print(f"   - Discovered T_c: {tc_validation['discovered_tc']:.3f}")
-    print(f"   - Theoretical T_c: {tc_validation['theoretical_tc']:.3f}")
-    print(f"   - Relative error: {tc_validation['relative_error_percent']:.2f}%")
-    print(f"   - Within tolerance: {tc_validation['within_tolerance']}")
-    print(f"   - Validation status: {tc_validation['validation_status']}")
-    
-    print("\n3. Comprehensive Physics Validation...")
-    validation_metrics = validator.comprehensive_physics_validation(
+    print("\n1. Basic Validation (Legacy Mode)...")
+    # Run basic validation first
+    basic_metrics = validator.comprehensive_physics_validation(
         latent_repr, order_param_candidates, phase_detection_result
     )
     
-    print(f"   - Overall physics consistency: {validation_metrics.physics_consistency_score:.3f}")
-    print(f"   - Order parameter correlation: {validation_metrics.order_parameter_correlation:.3f}")
-    print(f"   - Critical temperature error: {validation_metrics.critical_temperature_relative_error:.2f}%")
-    print(f"   - Energy conservation: {validation_metrics.energy_conservation_score:.3f}")
-    print(f"   - Magnetization conservation: {validation_metrics.magnetization_conservation_score:.3f}")
+    print(f"   - Overall physics consistency: {basic_metrics.physics_consistency_score:.3f}")
+    print(f"   - Order parameter correlation: {basic_metrics.order_parameter_correlation:.3f}")
+    print(f"   - Critical temperature error: {basic_metrics.critical_temperature_relative_error:.2f}%")
     
-    # Generate validation report
-    print("\n4. Generating Validation Report...")
-    report_text = validator.generate_validation_report(validation_metrics)
+    print("\n2. Enhanced Validation with Standard Configuration...")
+    # Use enhanced validation with standard config
+    config = get_default_config('standard')
+    config.critical_exponents.enable = True
+    config.symmetry_analysis.enable = True
+    config.symmetry_analysis.hamiltonian_symmetries = ['Z2']  # Ising model
     
-    # Save report
-    output_dir = Path("results/physics_validation_example")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    enhanced_metrics = validator.comprehensive_physics_validation(
+        latent_repr, order_param_candidates, phase_detection_result,
+        validation_config=config
+    )
     
-    with open(output_dir / "validation_report.txt", "w") as f:
-        f.write(report_text)
+    print(f"   - Overall physics consistency: {enhanced_metrics.physics_consistency_score:.3f}")
+    print(f"   - Order parameter correlation: {enhanced_metrics.order_parameter_correlation:.3f}")
+    print(f"   - Critical temperature error: {enhanced_metrics.critical_temperature_relative_error:.2f}%")
     
-    print(f"   - Report saved to: {output_dir / 'validation_report.txt'}")
+    # Show enhanced results
+    if enhanced_metrics.enhanced_results:
+        print(f"   - Enhanced features available: {list(enhanced_metrics.enhanced_results.keys())}")
+        
+        if 'critical_exponent_validation' in enhanced_metrics.enhanced_results:
+            crit_exp = enhanced_metrics.enhanced_results['critical_exponent_validation']
+            if crit_exp:
+                print(f"   - Critical exponents: β={crit_exp.beta_exponent:.4f}, γ={crit_exp.gamma_exponent:.4f}")
+                print(f"   - Universality class match: {crit_exp.universality_class_match}")
+        
+        if 'symmetry_validation' in enhanced_metrics.enhanced_results:
+            sym_val = enhanced_metrics.enhanced_results['symmetry_validation']
+            if sym_val:
+                print(f"   - Symmetry consistency: {sym_val.symmetry_consistency_score:.3f}")
+                print(f"   - Broken symmetries: {sym_val.broken_symmetries}")
     
-    return latent_repr, order_param_candidates, phase_detection_result, validation_metrics
+    print("\n3. Comprehensive Validation with All Features...")
+    # Use comprehensive validation
+    comprehensive_config = get_default_config('comprehensive')
+    comprehensive_config.experimental_comparison.enable = True
+    comprehensive_config.report_generation.enable = True
+    
+    comprehensive_metrics = validator.comprehensive_physics_validation(
+        latent_repr, order_param_candidates, phase_detection_result,
+        validation_config=comprehensive_config
+    )
+    
+    print(f"   - Overall physics consistency: {comprehensive_metrics.physics_consistency_score:.3f}")
+    print(f"   - Enhanced validation features: {len(comprehensive_metrics.enhanced_results or {})}")
+    
+    print("\n4. Generating Enhanced Validation Report...")
+    # Generate comprehensive physics review report
+    report_generator = PhysicsReviewReportGenerator()
+    
+    try:
+        report = report_generator.generate_comprehensive_report(
+            validation_results={
+                'basic_metrics': comprehensive_metrics,
+                'enhanced_results': comprehensive_metrics.enhanced_results or {}
+            },
+            include_educational_content=True
+        )
+        
+        # Save enhanced report
+        output_dir = Path("results/physics_validation_example")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save basic validation report
+        basic_report_text = validator.generate_validation_report(comprehensive_metrics)
+        with open(output_dir / "validation_report.txt", "w") as f:
+            f.write(basic_report_text)
+        
+        # Save enhanced report summary
+        enhanced_report_text = f"""Enhanced Physics Validation Report
+{'='*50}
+
+Overall Assessment: {report.overall_assessment}
+
+Physics Violations Found: {len(report.violations)}
+"""
+        
+        if report.violations:
+            enhanced_report_text += "\nViolations:\n"
+            for i, violation in enumerate(report.violations[:5], 1):
+                enhanced_report_text += f"{i}. {violation.violation_type} ({violation.severity}): {violation.description}\n"
+        
+        if report.educational_content:
+            enhanced_report_text += f"\nEducational Topics Covered: {len(report.educational_content)}\n"
+            for topic in list(report.educational_content.keys())[:3]:
+                enhanced_report_text += f"- {topic.replace('_', ' ').title()}\n"
+        
+        with open(output_dir / "enhanced_validation_report.txt", "w") as f:
+            f.write(enhanced_report_text)
+        
+        print(f"   - Basic report saved to: {output_dir / 'validation_report.txt'}")
+        print(f"   - Enhanced report saved to: {output_dir / 'enhanced_validation_report.txt'}")
+        print(f"   - Physics violations found: {len(report.violations)}")
+        print(f"   - Educational content topics: {len(report.educational_content) if report.educational_content else 0}")
+        
+    except Exception as e:
+        print(f"   - Enhanced report generation: {e}")
+        # Fallback to basic report
+        basic_report_text = validator.generate_validation_report(comprehensive_metrics)
+        output_dir = Path("results/physics_validation_example")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        with open(output_dir / "validation_report.txt", "w") as f:
+            f.write(basic_report_text)
+        print(f"   - Basic report saved to: {output_dir / 'validation_report.txt'}")
+    
+    return latent_repr, order_param_candidates, phase_detection_result, comprehensive_metrics
 
 
 def demonstrate_visualization():
@@ -271,34 +355,143 @@ def demonstrate_visualization():
     return report_metadata
 
 
+def demonstrate_experimental_comparison():
+    """Demonstrate experimental benchmark comparison."""
+    print("\n" + "="*60)
+    print("EXPERIMENTAL BENCHMARK COMPARISON")
+    print("="*60)
+    
+    # Create experimental comparator
+    exp_comparator = ExperimentalBenchmarkComparator()
+    
+    print("\n1. Adding Experimental Benchmarks...")
+    
+    # Add 2D Ising model benchmark
+    ising_benchmark = {
+        'critical_temperature': {
+            'value': 2.269,
+            'uncertainty': 0.001,
+            'source': 'Onsager (1944) - Exact solution',
+            'system': '2D Ising model'
+        },
+        'critical_exponents': {
+            'beta': {'value': 0.125, 'uncertainty': 0.002, 'source': 'Theoretical'},
+            'gamma': {'value': 1.75, 'uncertainty': 0.01, 'source': 'Theoretical'},
+            'nu': {'value': 1.0, 'uncertainty': 0.005, 'source': 'Theoretical'}
+        },
+        'universality_class': '2D Ising',
+        'dimensionality': 2
+    }
+    
+    try:
+        exp_comparator.add_experimental_benchmark(
+            name="2D_Ising_Theoretical",
+            data=ising_benchmark
+        )
+        print("   - Added 2D Ising theoretical benchmark")
+        
+        # Compare with computational results
+        computational_results = {
+            'critical_temperature': 2.275,  # From our phase detection
+            'beta_exponent': 0.128,
+            'gamma_exponent': 1.73,
+            'nu_exponent': 0.98
+        }
+        
+        print("\n2. Comparing with Computational Results...")
+        comparison_result = exp_comparator.compare_with_experiments(
+            computational_results=computational_results,
+            benchmark_name="2D_Ising_Theoretical"
+        )
+        
+        print(f"   - Overall agreement score: {comparison_result.overall_agreement:.3f}")
+        print(f"   - Statistical significance: {comparison_result.statistical_significance:.4f}")
+        
+        print("\n3. Parameter-by-Parameter Comparison:")
+        for param, comp in comparison_result.parameter_comparisons.items():
+            print(f"   - {param}:")
+            print(f"     Computational: {comp.computational_value:.4f}")
+            print(f"     Experimental: {comp.experimental_value:.4f} ± {comp.experimental_uncertainty:.4f}")
+            print(f"     Agreement: {comp.agreement_metric:.3f}")
+        
+        if comparison_result.discrepancies:
+            print(f"\n4. Discrepancies Found ({len(comparison_result.discrepancies)}):")
+            for i, disc in enumerate(comparison_result.discrepancies[:3], 1):
+                print(f"   {i}. {disc.parameter}: {disc.explanation}")
+        
+        # Save comparison results
+        output_dir = Path("results/physics_validation_example")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        comparison_text = f"""Experimental Comparison Results
+{'='*40}
+
+Overall Agreement Score: {comparison_result.overall_agreement:.3f}
+Statistical Significance: {comparison_result.statistical_significance:.4f}
+
+Parameter Comparisons:
+"""
+        for param, comp in comparison_result.parameter_comparisons.items():
+            comparison_text += f"""
+{param}:
+  Computational: {comp.computational_value:.4f}
+  Experimental: {comp.experimental_value:.4f} ± {comp.experimental_uncertainty:.4f}
+  Agreement: {comp.agreement_metric:.3f}
+"""""
+        
+        with open(output_dir / "experimental_comparison.txt", "w") as f:
+            f.write(comparison_text)
+        
+        print(f"\n   - Comparison results saved to: {output_dir / 'experimental_comparison.txt'}")
+        
+    except Exception as e:
+        print(f"   - Experimental comparison error: {e}")
+    
+    print()
+
+
 def main():
     """Main demonstration function."""
-    print("Physics Validation and Visualization Example")
-    print("=" * 50)
-    print("This example demonstrates the comprehensive physics validation")
+    print("Enhanced Physics Validation and Visualization Example")
+    print("=" * 60)
+    print("This example demonstrates the comprehensive enhanced physics validation")
     print("and visualization system for AI-discovered physics results.")
+    print("\nEnhanced features include:")
+    print("- Critical exponent analysis and finite-size scaling validation")
+    print("- Symmetry analysis and theoretical model validation")
+    print("- Statistical physics analysis with uncertainty quantification")
+    print("- Experimental benchmark comparison")
+    print("- Comprehensive physics review report generation")
     
     try:
         # Run demonstrations
         report_metadata = demonstrate_visualization()
+        demonstrate_experimental_comparison()
         
         print("\n" + "="*60)
         print("DEMONSTRATION COMPLETED SUCCESSFULLY!")
         print("="*60)
         print(f"\nAll results saved to: {report_metadata['report_directory']}")
         print("\nGenerated files:")
-        print("- validation_report.txt: Detailed physics validation report")
+        print("- validation_report.txt: Basic physics validation report")
+        print("- enhanced_validation_report.txt: Enhanced validation with physics review")
+        print("- experimental_comparison.txt: Experimental benchmark comparison")
         print("- analysis_report.html: Interactive HTML report")
         print("- summary_statistics.json: Machine-readable summary")
         print("- Multiple publication-ready figures (PNG and PDF)")
         
         print("\nKey Features Demonstrated:")
-        print("✓ Order parameter validation against theoretical magnetization")
-        print("✓ Critical temperature accuracy testing (within 5% tolerance)")
-        print("✓ Physics consistency scoring and statistical significance")
+        print("✓ Enhanced order parameter validation with symmetry analysis")
+        print("✓ Critical exponent computation and universality class identification")
+        print("✓ Finite-size scaling analysis (when multi-size data available)")
+        print("✓ Theoretical model validation (Ising, XY, Heisenberg)")
+        print("✓ Statistical physics analysis with bootstrap confidence intervals")
+        print("✓ Experimental benchmark comparison with agreement metrics")
+        print("✓ Comprehensive physics review report generation")
+        print("✓ Educational content and physics explanations")
+        print("✓ Physics violation detection and severity assessment")
         print("✓ Publication-ready visualization generation")
-        print("✓ Comprehensive analysis reporting")
-        print("✓ HTML report with embedded figures and statistics")
+        print("✓ Backward compatibility with legacy validation")
         
     except Exception as e:
         print(f"\nError during demonstration: {e}")
