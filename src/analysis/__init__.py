@@ -7,6 +7,36 @@ physical insights from latent space representations.
 
 from .latent_analysis import LatentAnalyzer, LatentRepresentation
 from .order_parameter_discovery import OrderParameterAnalyzer, CorrelationResult, OrderParameterCandidate
+from .data_quality_3d import (
+    DataQualityAnalyzer3D,
+    DataQualityReport3D,
+    MagnetizationAnalysisResult,
+    analyze_3d_dataset_quality
+)
+from .critical_exponent_analyzer import (
+    CriticalExponentAnalyzer,
+    PowerLawFitter,
+    PowerLawFitResult,
+    CriticalExponentResults,
+    create_critical_exponent_analyzer
+)
+
+# Publication materials generation
+from .systematic_comparison_framework import (
+    SystematicComparisonFramework,
+    SystemComparisonData,
+    ComparisonResults
+)
+from .critical_exponent_comparison_tables import (
+    CriticalExponentComparisonTables,
+    CriticalExponentData,
+    ExponentComparisonSummary
+)
+from .publication_figure_generator import (
+    PublicationFigureGenerator,
+    PublicationFigureSpec,
+    PublicationPackage
+)
 
 # Enhanced validation types and interfaces
 from .enhanced_validation_types import (
@@ -68,6 +98,30 @@ __all__ = [
     'OrderParameterAnalyzer',
     'CorrelationResult',
     'OrderParameterCandidate',
+    
+    # 3D Data quality analysis
+    'DataQualityAnalyzer3D',
+    'DataQualityReport3D',
+    'MagnetizationAnalysisResult',
+    'analyze_3d_dataset_quality',
+    
+    # Critical exponent analysis
+    'CriticalExponentAnalyzer',
+    'PowerLawFitter',
+    'PowerLawFitResult',
+    'CriticalExponentResults',
+    'create_critical_exponent_analyzer',
+    
+    # Publication materials generation
+    'SystematicComparisonFramework',
+    'SystemComparisonData',
+    'ComparisonResults',
+    'CriticalExponentComparisonTables',
+    'CriticalExponentData',
+    'ExponentComparisonSummary',
+    'PublicationFigureGenerator',
+    'PublicationFigureSpec',
+    'PublicationPackage',
     
     # Enhanced validation exceptions
     'PhysicsValidationError',

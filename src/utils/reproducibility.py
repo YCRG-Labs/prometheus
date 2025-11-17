@@ -1,307 +1,294 @@
 """
-Reproducibility utilities for the Prometheus project.
-Manages random seeds across NumPy, PyTorch, and Python random modules.
+Reproducibility utilities for ensuring deterministic results.
+
+This module provides utilities for setting random seeds across all libraries
+used in the Prometheus system to ensure reproducible results.
 """
 
-import os
 import random
-import logging
-import platform
-import subprocess
-from typing import Dict, Any, Optional
-from datetime import datetime
-import hashlib
-import json
-
 import numpy as np
-
-# PyTorch imports with error handling
-try:
-    import torch
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    torch = None
+import os
+from typing import Optional, Dict, Any
 
 
-class ReproducibilityManager:
-    """Manages reproducibility settings and environment tracking."""
-    
-    def __init__(self, seed: int = 42):
-        self.seed = seed
-        self.logger = logging.getLogger(__name__)
-        self.environment_info = {}
-        
-    def set_seeds(self, seed: Optional[int] = None) -> None:
-        """
-        Set random seeds for all relevant libraries.
-        
-        Args:
-            seed: Random seed to use. If None, uses the instance seed.
-        """
-        if seed is not None:
-            self.seed = seed
-        
-        # Set Python random seed
-        random.seed(self.seed)
-        self.logger.info(f"Set Python random seed to {self.seed}")
-        
-        # Set NumPy seed
-        np.random.seed(self.seed)
-        self.logger.info(f"Set NumPy random seed to {self.seed}")
-        
-        # Set PyTorch seeds if available
-        if TORCH_AVAILABLE:
-            torch.manual_seed(self.seed)
-            self.logger.info(f"Set PyTorch CPU seed to {self.seed}")
-            
-            if torch.cuda.is_available():
-                torch.cuda.manual_seed(self.seed)
-                torch.cuda.manual_seed_all(self.seed)
-                self.logger.info(f"Set PyTorch CUDA seed to {self.seed}")
-                
-                # Additional CUDA reproducibility settings
-                torch.backends.cudnn.deterministic = True
-                torch.backends.cudnn.benchmark = False
-                self.logger.info("Set CUDA deterministic mode")
-        else:
-            self.logger.warning("PyTorch not available, skipping PyTorch seed setting")
-        
-        # Set environment variable for hash seed (affects Python's hash() function)
-        os.environ['PYTHONHASHSEED'] = str(self.seed)
-        self.logger.info(f"Set PYTHONHASHSEED to {self.seed}")
-    
-    def capture_environment_info(self) -> Dict[str, Any]:
-        """
-        Capture comprehensive environment information for reproducibility.
-        
-        Returns:
-            Dict containing environment information.
-        """
-        env_info = {
-            'timestamp': datetime.now().isoformat(),
-            'seed': self.seed,
-            'platform': {
-                'system': platform.system(),
-                'release': platform.release(),
-                'version': platform.version(),
-                'machine': platform.machine(),
-                'processor': platform.processor(),
-                'python_version': platform.python_version(),
-                'python_implementation': platform.python_implementation()
-            },
-            'packages': self._get_package_versions(),
-            'environment_variables': self._get_relevant_env_vars(),
-            'hardware': self._get_hardware_info()
-        }
-        
-        self.environment_info = env_info
-        self.logger.info("Captured environment information")
-        return env_info
-    
-    def _get_package_versions(self) -> Dict[str, str]:
-        """Get versions of relevant packages."""
-        packages = {}
-        
-        # Core packages
-        try:
-            packages['numpy'] = np.__version__
-        except:
-            packages['numpy'] = 'not available'
-        
-        if TORCH_AVAILABLE:
-            try:
-                packages['torch'] = torch.__version__
-            except:
-                packages['torch'] = 'not available'
-        else:
-            packages['torch'] = 'not installed'
-        
-        # Try to get other common packages
-        package_names = ['scipy', 'matplotlib', 'h5py', 'yaml', 'sklearn']
-        for pkg_name in package_names:
-            try:
-                pkg = __import__(pkg_name)
-                packages[pkg_name] = getattr(pkg, '__version__', 'version unknown')
-            except ImportError:
-                packages[pkg_name] = 'not installed'
-        
-        return packages
-    
-    def _get_relevant_env_vars(self) -> Dict[str, str]:
-        """Get relevant environment variables."""
-        relevant_vars = [
-            'PYTHONHASHSEED',
-            'CUDA_VISIBLE_DEVICES',
-            'OMP_NUM_THREADS',
-            'MKL_NUM_THREADS',
-            'NUMEXPR_NUM_THREADS'
-        ]
-        
-        env_vars = {}
-        for var in relevant_vars:
-            env_vars[var] = os.environ.get(var, 'not set')
-        
-        return env_vars
-    
-    def _get_hardware_info(self) -> Dict[str, Any]:
-        """Get hardware information."""
-        hardware_info = {}
-        
-        # CPU information
-        try:
-            if platform.system() == "Linux":
-                with open('/proc/cpuinfo', 'r') as f:
-                    cpu_info = f.read()
-                    # Extract CPU model
-                    for line in cpu_info.split('\n'):
-                        if 'model name' in line:
-                            hardware_info['cpu_model'] = line.split(':')[1].strip()
-                            break
-            else:
-                hardware_info['cpu_model'] = platform.processor()
-        except:
-            hardware_info['cpu_model'] = 'unknown'
-        
-        # GPU information
-        if TORCH_AVAILABLE and torch.cuda.is_available():
-            hardware_info['cuda_available'] = True
-            hardware_info['cuda_version'] = torch.version.cuda
-            hardware_info['gpu_count'] = torch.cuda.device_count()
-            hardware_info['gpu_names'] = [
-                torch.cuda.get_device_name(i) 
-                for i in range(torch.cuda.device_count())
-            ]
-        else:
-            hardware_info['cuda_available'] = False
-        
-        return hardware_info
-    
-    def save_environment_info(self, filepath: str) -> None:
-        """
-        Save environment information to a JSON file.
-        
-        Args:
-            filepath: Path to save the environment information.
-        """
-        if not self.environment_info:
-            self.capture_environment_info()
-        
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        
-        with open(filepath, 'w') as f:
-            json.dump(self.environment_info, f, indent=2)
-        
-        self.logger.info(f"Environment information saved to {filepath}")
-    
-    def generate_experiment_hash(self, config_dict: Dict[str, Any]) -> str:
-        """
-        Generate a unique hash for the experiment based on configuration and environment.
-        
-        Args:
-            config_dict: Configuration dictionary.
-            
-        Returns:
-            Hexadecimal hash string.
-        """
-        # Combine configuration and key environment info
-        hash_data = {
-            'config': config_dict,
-            'seed': self.seed,
-            'python_version': platform.python_version(),
-            'packages': self._get_package_versions()
-        }
-        
-        # Create hash
-        hash_string = json.dumps(hash_data, sort_keys=True)
-        experiment_hash = hashlib.sha256(hash_string.encode()).hexdigest()[:16]
-        
-        self.logger.info(f"Generated experiment hash: {experiment_hash}")
-        return experiment_hash
-    
-    def verify_reproducibility(self, reference_hash: str, config_dict: Dict[str, Any]) -> bool:
-        """
-        Verify if current environment can reproduce results from reference hash.
-        
-        Args:
-            reference_hash: Hash from previous experiment.
-            config_dict: Current configuration.
-            
-        Returns:
-            True if environment is compatible for reproduction.
-        """
-        current_hash = self.generate_experiment_hash(config_dict)
-        is_reproducible = current_hash == reference_hash
-        
-        if is_reproducible:
-            self.logger.info("Environment verified for reproducibility")
-        else:
-            self.logger.warning(
-                f"Environment may not be reproducible. "
-                f"Current hash: {current_hash}, Reference hash: {reference_hash}"
-            )
-        
-        return is_reproducible
-
-
-def setup_reproducibility(seed: int = 42) -> ReproducibilityManager:
+def set_random_seed(seed: int = 42) -> None:
     """
-    Convenience function to set up reproducibility with a given seed.
+    Set random seed for all random number generators used in the system.
+    
+    This function sets seeds for:
+    - Python's built-in random module
+    - NumPy
+    - PyTorch (if available)
+    - CUDA (if available)
     
     Args:
-        seed: Random seed to use across all libraries.
+        seed: Random seed value (default: 42)
+        
+    Example:
+        >>> from src.utils.reproducibility import set_random_seed
+        >>> set_random_seed(42)
+        >>> # All subsequent random operations will be deterministic
+    """
+    # Set Python random seed
+    random.seed(seed)
+    
+    # Set NumPy random seed
+    np.random.seed(seed)
+    
+    # Set PyTorch seeds if available
+    try:
+        import torch
+        torch.manual_seed(seed)
+        
+        # Set CUDA seed if available
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            
+            # Make CUDA operations deterministic
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+    except ImportError:
+        pass  # PyTorch not installed
+    
+    # Set environment variable for hash seed (Python 3.3+)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+
+
+def get_reproducibility_info() -> dict:
+    """
+    Get information about reproducibility settings.
+    
+    Returns:
+        Dictionary containing:
+        - python_seed: Current Python random seed state
+        - numpy_seed: Current NumPy random seed state
+        - torch_available: Whether PyTorch is available
+        - cuda_available: Whether CUDA is available
+        - cudnn_deterministic: Whether cuDNN deterministic mode is enabled
+        
+    Example:
+        >>> info = get_reproducibility_info()
+        >>> print(f"PyTorch available: {info['torch_available']}")
+    """
+    info = {
+        'python_seed': random.getstate()[1][0],  # Get first value from state
+        'numpy_seed': np.random.get_state()[1][0],  # Get first value from state
+        'torch_available': False,
+        'cuda_available': False,
+        'cudnn_deterministic': False,
+    }
+    
+    try:
+        import torch
+        info['torch_available'] = True
+        info['cuda_available'] = torch.cuda.is_available()
+        info['cudnn_deterministic'] = torch.backends.cudnn.deterministic
+    except ImportError:
+        pass
+    
+    return info
+
+
+class ReproducibleContext:
+    """
+    Context manager for reproducible operations.
+    
+    This context manager temporarily sets a random seed for a block of code,
+    then restores the previous random state.
+    
+    Example:
+        >>> with ReproducibleContext(42):
+        ...     # All random operations here are deterministic
+        ...     data = np.random.randn(100)
+        >>> # Previous random state is restored
+    """
+    
+    def __init__(self, seed: int = 42):
+        """
+        Initialize reproducible context.
+        
+        Args:
+            seed: Random seed to use within the context
+        """
+        self.seed = seed
+        self.python_state = None
+        self.numpy_state = None
+        self.torch_state = None
+        self.torch_cuda_state = None
+        
+    def __enter__(self):
+        """Save current random states and set new seed."""
+        # Save current states
+        self.python_state = random.getstate()
+        self.numpy_state = np.random.get_state()
+        
+        try:
+            import torch
+            self.torch_state = torch.get_rng_state()
+            if torch.cuda.is_available():
+                self.torch_cuda_state = torch.cuda.get_rng_state_all()
+        except ImportError:
+            pass
+        
+        # Set new seed
+        set_random_seed(self.seed)
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Restore previous random states."""
+        # Restore states
+        random.setstate(self.python_state)
+        np.random.set_state(self.numpy_state)
+        
+        try:
+            import torch
+            if self.torch_state is not None:
+                torch.set_rng_state(self.torch_state)
+            if self.torch_cuda_state is not None:
+                torch.cuda.set_rng_state_all(self.torch_cuda_state)
+        except ImportError:
+            pass
+        
+        return False  # Don't suppress exceptions
+
+
+def validate_reproducibility(func, seed: int = 42, n_runs: int = 2) -> bool:
+    """
+    Validate that a function produces reproducible results.
+    
+    Args:
+        func: Function to test (should take no arguments)
+        seed: Random seed to use
+        n_runs: Number of runs to compare
         
     Returns:
-        ReproducibilityManager instance.
+        True if all runs produce identical results, False otherwise
+        
+    Example:
+        >>> def my_random_function():
+        ...     return np.random.randn(10)
+        >>> is_reproducible = validate_reproducibility(my_random_function)
     """
-    manager = ReproducibilityManager(seed)
-    manager.set_seeds()
-    manager.capture_environment_info()
-    return manager
+    results = []
+    
+    for _ in range(n_runs):
+        set_random_seed(seed)
+        result = func()
+        results.append(result)
+    
+    # Check if all results are equal
+    first_result = results[0]
+    for result in results[1:]:
+        if isinstance(first_result, np.ndarray):
+            if not np.allclose(first_result, result):
+                return False
+        else:
+            if first_result != result:
+                return False
+    
+    return True
+
+
+# Aliases for backward compatibility
+set_random_seeds = set_random_seed
+
+
+def get_random_state() -> Dict[str, Any]:
+    """
+    Get the current state of all random number generators.
+    
+    Returns:
+        Dictionary containing the state of all RNGs
+        
+    Example:
+        >>> state = get_random_state()
+        >>> # ... do some random operations ...
+        >>> set_random_state(state)  # Restore state
+    """
+    state = {
+        'python': random.getstate(),
+        'numpy': np.random.get_state(),
+    }
+    
+    try:
+        import torch
+        state['torch'] = torch.get_rng_state()
+        if torch.cuda.is_available():
+            state['torch_cuda'] = torch.cuda.get_rng_state_all()
+    except ImportError:
+        pass
+    
+    return state
+
+
+def set_random_state(state: Dict[str, Any]) -> None:
+    """
+    Restore the state of all random number generators.
+    
+    Args:
+        state: Dictionary containing RNG states (from get_random_state())
+        
+    Example:
+        >>> state = get_random_state()
+        >>> # ... do some random operations ...
+        >>> set_random_state(state)  # Restore state
+    """
+    if 'python' in state:
+        random.setstate(state['python'])
+    
+    if 'numpy' in state:
+        np.random.set_state(state['numpy'])
+    
+    try:
+        import torch
+        if 'torch' in state:
+            torch.set_rng_state(state['torch'])
+        if 'torch_cuda' in state and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(state['torch_cuda'])
+    except ImportError:
+        pass
+
+
+# Legacy aliases for backward compatibility
+class ReproducibilityManager:
+    """Legacy class for backward compatibility."""
+    
+    @staticmethod
+    def set_seed(seed: int = 42):
+        """Set random seed (legacy method)."""
+        set_random_seed(seed)
+    
+    @staticmethod
+    def get_state():
+        """Get random state (legacy method)."""
+        return get_random_state()
+    
+    @staticmethod
+    def set_state(state):
+        """Set random state (legacy method)."""
+        set_random_state(state)
+
+
+def setup_reproducibility(seed: int = 42):
+    """
+    Setup reproducibility for the entire system (legacy function).
+    
+    Args:
+        seed: Random seed to use
+    """
+    set_random_seed(seed)
 
 
 def ensure_deterministic_operations():
-    """Ensure deterministic operations for PyTorch if available."""
-    if TORCH_AVAILABLE and torch.cuda.is_available():
-        # Additional settings for deterministic behavior
-        torch.use_deterministic_algorithms(True, warn_only=True)
-        
-        # Set environment variable for deterministic CUDA operations
-        os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
-        
-        logger = logging.getLogger(__name__)
-        logger.info("Enabled deterministic CUDA operations")
+    """
+    Ensure all operations are deterministic (legacy function).
+    
+    This is automatically handled by set_random_seed().
+    """
+    pass  # Already handled in set_random_seed
 
 
-class ReproducibilityContext:
-    """Context manager for reproducible code blocks."""
-    
-    def __init__(self, seed: int):
-        self.seed = seed
-        self.original_states = {}
-        
-    def __enter__(self):
-        # Save current states
-        self.original_states['python'] = random.getstate()
-        self.original_states['numpy'] = np.random.get_state()
-        
-        if TORCH_AVAILABLE:
-            self.original_states['torch'] = torch.get_rng_state()
-            if torch.cuda.is_available():
-                self.original_states['torch_cuda'] = torch.cuda.get_rng_state_all()
-        
-        # Set new seed
-        manager = ReproducibilityManager(self.seed)
-        manager.set_seeds()
-        
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Restore original states
-        random.setstate(self.original_states['python'])
-        np.random.set_state(self.original_states['numpy'])
-        
-        if TORCH_AVAILABLE:
-            torch.set_rng_state(self.original_states['torch'])
-            if torch.cuda.is_available():
-                torch.cuda.set_rng_state_all(self.original_states['torch_cuda'])
+class ReproducibilityContext(ReproducibleContext):
+    """Legacy alias for ReproducibleContext."""
+    pass
