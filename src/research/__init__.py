@@ -1,0 +1,413 @@
+"""
+Novel Ising Model Research Explorer
+
+This module provides tools for systematic exploration of lesser-known Ising model
+variants to discover novel condensed matter physics phenomena and validate
+theoretical hypotheses.
+"""
+
+from .base_types import (
+    ModelVariantConfig,
+    ResearchHypothesis,
+    SimulationData,
+    VAEAnalysisResults,
+    NovelPhenomenon,
+    DiscoveryResults,
+    ExplorationStrategy,
+    ValidationResult,
+)
+
+from .base_plugin import ModelVariantPlugin, BaseSimulator, SpinFlipProposal
+from .model_registry import ModelVariantRegistry
+from .plugin_registry import PluginRegistry, get_global_plugin_registry
+from .hypothesis_manager import HypothesisManager, UNIVERSALITY_CLASSES
+from .parameter_explorer import ParameterSpaceExplorer, ParameterPoint
+from .discovery_pipeline import DiscoveryPipeline, DiscoveryConfig
+from .phenomena_detector import NovelPhenomenonDetector, UniversalityClass
+from .comparative_analyzer import (
+    ComparativeAnalyzer,
+    ComparisonResults,
+    UniversalityTest,
+    ScalingViolation,
+)
+from .validation_framework import ValidationFramework
+from .prometheus_integration import PrometheusIntegration, PrometheusConfig
+from .error_recovery import (
+    ErrorRecoveryManager,
+    ErrorContext,
+    ErrorCategory,
+    RecoveryAction,
+    RecoveryStrategy,
+)
+from .resource_manager import (
+    ResourceManager,
+    ParallelExecutor,
+    ResourceAllocation,
+    ResourceStats,
+)
+from .confidence_aggregator import ConfidenceAggregator, AggregatedConfidence
+from .validation_triangle import (
+    ValidationTriangle,
+    TriangleValidation,
+    TriangleEdge,
+    TriangleVertex,
+    ConsistencyStatus,
+)
+from .two_dimensional_validator import (
+    TwoDimensionalValidator,
+    TwoDValidationResult,
+)
+from .anomaly_classifier import (
+    MethodologicalAnomalyClassifier,
+    AnomalyCategory,
+    ClassifiedAnomaly,
+)
+from .error_propagation_tracker import (
+    ErrorPropagationTracker,
+    PropagationStage,
+    StageUncertainty,
+    PropagationChain,
+)
+from .universality_class_manager import (
+    UniversalityClassManager,
+    UsageRecord,
+    ClassUsageStatistics,
+)
+from .hybrid_validator import (
+    HybridValidator,
+    HybridValidationResult,
+    DataCharacteristics,
+)
+from .effect_size_prioritizer import (
+    EffectSizePrioritizer,
+    Finding,
+    PrioritizedFinding,
+    SignificanceCategory,
+    EffectSizeCategory,
+    FindingCategory,
+)
+from .campaign_orchestrator import (
+    DiscoveryCampaignOrchestrator,
+    CampaignConfig,
+    CampaignResults,
+    TargetVariant,
+)
+from .target_selection_engine import (
+    TargetSelectionEngine,
+    SelectionCriteria,
+)
+from .exploration_planner import (
+    ExplorationPlanner,
+    ExplorationPlan,
+)
+from .unified_validation_pipeline import (
+    UnifiedValidationPipeline,
+    ValidationReport,
+)
+from .discovery_assessor import (
+    DiscoveryAssessor,
+    PhysicsDiscovery,
+)
+from .publication_generator import (
+    PublicationGenerator,
+    PublicationPackage,
+)
+from .dtfim_coarse_explorer import (
+    DTFIMCoarseExplorer,
+    DTFIMCoarseExplorationResult,
+    DTFIMScanPoint,
+    AnomalyReport,
+)
+from .dtfim_refined_explorer import (
+    DTFIMRefinedExplorer,
+    RefinedExplorationResult,
+    RefinedScanPoint,
+    AnomalousRegion,
+)
+from .dtfim_characterizer import (
+    DTFIMAnomalyCharacterizer,
+    AnomalyClassification,
+    AnomalyType,
+    DynamicalExponentResult,
+    RareRegionAnalysis,
+    KnownDisorderedQCP,
+    KNOWN_DISORDERED_QCPS,
+    CharacterizationReport,
+    characterize_dtfim_anomalies,
+)
+from .secondary_system_explorer import (
+    SecondarySystemType,
+    LongRangeAnomalousRegion,
+    FloquetAnomalousRegion,
+    LongRangeScanPoint,
+    FloquetScanPoint,
+    LongRangeExplorationResult,
+    FloquetExplorationResult,
+    LongRangeIsingRefinedExplorer,
+    FloquetIsingRefinedExplorer,
+    CrossComparisonResult,
+    UniversalFeature,
+    SecondarySystemCrossComparator,
+    UniversalFeatureDetector,
+    SecondarySystemAnalysisReport,
+    run_secondary_system_refinement,
+)
+from .month2_decision_point import (
+    Month2DecisionPoint,
+    AnomalyEvaluation,
+    ValidationCriteria,
+    Month3Plan,
+    run_month2_decision_point,
+)
+from .finite_size_scaling import (
+    FiniteSizeScalingAnalyzer,
+    FiniteSizeScalingResult,
+    FiniteSizeDataPoint,
+    CriticalPointEstimate,
+    ScalingCollapseResult,
+    STANDARD_SYSTEM_SIZES,
+    run_task14_finite_size_scaling,
+)
+from .critical_exponent_extractor import (
+    CriticalExponentExtractor,
+    CriticalExponentsResult,
+    ExponentResult,
+    ScalingRelationCheck,
+    KNOWN_UNIVERSALITY_CLASSES,
+    extract_critical_exponents,
+    run_task15_critical_exponents,
+)
+from .entanglement_analyzer import (
+    EntanglementAnalyzer,
+    EntanglementAnalysisResult,
+    EntanglementDataPoint,
+    EntropyScalingResult,
+    AreaLawCheckResult,
+    CentralChargeResult,
+    EntanglementSpectrumResult,
+    KNOWN_CENTRAL_CHARGES,
+    run_task16_entanglement_analysis,
+    analyze_entanglement_at_criticality,
+)
+from .cross_validator import (
+    CrossValidator,
+    CrossValidationResult,
+    VAEEDComparison,
+    UniversalityClassComparison,
+    ValidationPattern,
+    run_cross_validation,
+    run_task17_cross_validation,
+)
+from .month3_decision_point import (
+    Month3DecisionMaker,
+    Month3DecisionResult,
+    ValidationAssessment,
+    NoveltyAssessment,
+    SignificanceAssessment,
+    PivotRecommendation,
+    run_month3_decision_point,
+    create_mock_results_for_testing,
+)
+from .physical_explanation import (
+    PhysicalExplanationDeveloper,
+    PhysicalExplanationResult,
+    PhysicalMechanism,
+    MechanismIdentification,
+    RGAnalysis,
+    ScalingRelation,
+    ScalingRelationsAnalysis,
+    TestablePrediction,
+    TestablePredictionsAnalysis,
+    run_task19_physical_explanation,
+)
+from .experimental_relevance import (
+    ExperimentalRelevanceAnalyzer,
+    ExperimentalRelevanceResult,
+    ExperimentalPlatform,
+    FeasibilityLevel,
+    ExperimentalRealization,
+    ExperimentalTest,
+    QuantumComputingApplication,
+    BroaderImpact,
+    run_task20_experimental_relevance,
+)
+from . import model_plugins
+
+__all__ = [
+    'ModelVariantConfig',
+    'ResearchHypothesis',
+    'SimulationData',
+    'VAEAnalysisResults',
+    'NovelPhenomenon',
+    'DiscoveryResults',
+    'ExplorationStrategy',
+    'ValidationResult',
+    'ModelVariantPlugin',
+    'BaseSimulator',
+    'SpinFlipProposal',
+    'ModelVariantRegistry',
+    'PluginRegistry',
+    'get_global_plugin_registry',
+    'HypothesisManager',
+    'UNIVERSALITY_CLASSES',
+    'ParameterSpaceExplorer',
+    'ParameterPoint',
+    'DiscoveryPipeline',
+    'DiscoveryConfig',
+    'NovelPhenomenonDetector',
+    'UniversalityClass',
+    'ComparativeAnalyzer',
+    'ComparisonResults',
+    'UniversalityTest',
+    'ScalingViolation',
+    'ValidationFramework',
+    'PrometheusIntegration',
+    'PrometheusConfig',
+    'ErrorRecoveryManager',
+    'ErrorContext',
+    'ErrorCategory',
+    'RecoveryAction',
+    'RecoveryStrategy',
+    'ResourceManager',
+    'ParallelExecutor',
+    'ResourceAllocation',
+    'ResourceStats',
+    'ConfidenceAggregator',
+    'AggregatedConfidence',
+    'ValidationTriangle',
+    'TriangleValidation',
+    'TriangleEdge',
+    'TriangleVertex',
+    'ConsistencyStatus',
+    'TwoDimensionalValidator',
+    'TwoDValidationResult',
+    'MethodologicalAnomalyClassifier',
+    'AnomalyCategory',
+    'ClassifiedAnomaly',
+    'ErrorPropagationTracker',
+    'PropagationStage',
+    'StageUncertainty',
+    'PropagationChain',
+    'UniversalityClassManager',
+    'UsageRecord',
+    'ClassUsageStatistics',
+    'HybridValidator',
+    'HybridValidationResult',
+    'DataCharacteristics',
+    'EffectSizePrioritizer',
+    'Finding',
+    'PrioritizedFinding',
+    'SignificanceCategory',
+    'EffectSizeCategory',
+    'FindingCategory',
+    'DiscoveryCampaignOrchestrator',
+    'CampaignConfig',
+    'CampaignResults',
+    'TargetVariant',
+    'TargetSelectionEngine',
+    'SelectionCriteria',
+    'ExplorationPlanner',
+    'ExplorationPlan',
+    'UnifiedValidationPipeline',
+    'ValidationReport',
+    'DiscoveryAssessor',
+    'PhysicsDiscovery',
+    'PublicationGenerator',
+    'PublicationPackage',
+    'DTFIMCoarseExplorer',
+    'DTFIMCoarseExplorationResult',
+    'DTFIMScanPoint',
+    'AnomalyReport',
+    'DTFIMRefinedExplorer',
+    'RefinedExplorationResult',
+    'RefinedScanPoint',
+    'AnomalousRegion',
+    'DTFIMAnomalyCharacterizer',
+    'AnomalyClassification',
+    'AnomalyType',
+    'DynamicalExponentResult',
+    'RareRegionAnalysis',
+    'KnownDisorderedQCP',
+    'KNOWN_DISORDERED_QCPS',
+    'CharacterizationReport',
+    'characterize_dtfim_anomalies',
+    'SecondarySystemType',
+    'LongRangeAnomalousRegion',
+    'FloquetAnomalousRegion',
+    'LongRangeScanPoint',
+    'FloquetScanPoint',
+    'LongRangeExplorationResult',
+    'FloquetExplorationResult',
+    'LongRangeIsingRefinedExplorer',
+    'FloquetIsingRefinedExplorer',
+    'CrossComparisonResult',
+    'UniversalFeature',
+    'SecondarySystemCrossComparator',
+    'UniversalFeatureDetector',
+    'SecondarySystemAnalysisReport',
+    'run_secondary_system_refinement',
+    'Month2DecisionPoint',
+    'AnomalyEvaluation',
+    'ValidationCriteria',
+    'Month3Plan',
+    'run_month2_decision_point',
+    'FiniteSizeScalingAnalyzer',
+    'FiniteSizeScalingResult',
+    'FiniteSizeDataPoint',
+    'CriticalPointEstimate',
+    'ScalingCollapseResult',
+    'STANDARD_SYSTEM_SIZES',
+    'run_task14_finite_size_scaling',
+    'CriticalExponentExtractor',
+    'CriticalExponentsResult',
+    'ExponentResult',
+    'ScalingRelationCheck',
+    'KNOWN_UNIVERSALITY_CLASSES',
+    'extract_critical_exponents',
+    'run_task15_critical_exponents',
+    'EntanglementAnalyzer',
+    'EntanglementAnalysisResult',
+    'EntanglementDataPoint',
+    'EntropyScalingResult',
+    'AreaLawCheckResult',
+    'CentralChargeResult',
+    'EntanglementSpectrumResult',
+    'KNOWN_CENTRAL_CHARGES',
+    'run_task16_entanglement_analysis',
+    'analyze_entanglement_at_criticality',
+    'CrossValidator',
+    'CrossValidationResult',
+    'VAEEDComparison',
+    'UniversalityClassComparison',
+    'ValidationPattern',
+    'run_cross_validation',
+    'run_task17_cross_validation',
+    'Month3DecisionMaker',
+    'Month3DecisionResult',
+    'ValidationAssessment',
+    'NoveltyAssessment',
+    'SignificanceAssessment',
+    'PivotRecommendation',
+    'run_month3_decision_point',
+    'create_mock_results_for_testing',
+    'PhysicalExplanationDeveloper',
+    'PhysicalExplanationResult',
+    'PhysicalMechanism',
+    'MechanismIdentification',
+    'RGAnalysis',
+    'ScalingRelation',
+    'ScalingRelationsAnalysis',
+    'TestablePrediction',
+    'TestablePredictionsAnalysis',
+    'run_task19_physical_explanation',
+    'ExperimentalRelevanceAnalyzer',
+    'ExperimentalRelevanceResult',
+    'ExperimentalPlatform',
+    'FeasibilityLevel',
+    'ExperimentalRealization',
+    'ExperimentalTest',
+    'QuantumComputingApplication',
+    'BroaderImpact',
+    'run_task20_experimental_relevance',
+    'model_plugins',
+]

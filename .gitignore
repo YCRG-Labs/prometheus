@@ -234,3 +234,5 @@ TASK_*.md
 /data/
 /models/
 /tests/
+/notes/
+/publication/

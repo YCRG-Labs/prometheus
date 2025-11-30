@@ -18,6 +18,15 @@ from .vae_3d import ConvolutionalVAE3D
 # Adaptive architecture management
 from .adaptive_vae import AdaptiveVAEManager, VAEFactory
 
+# Quantum-aware VAE
+from .quantum_vae import (
+    QuantumStateEncoder,
+    QuantumStateDecoder,
+    QuantumVAE,
+    prepare_quantum_state_batch,
+    extract_quantum_states
+)
+
 __all__ = [
     # 2D components
     'ConvolutionalEncoder',
@@ -31,5 +40,12 @@ __all__ = [
     
     # Adaptive management
     'AdaptiveVAEManager',
-    'VAEFactory'
+    'VAEFactory',
+    
+    # Quantum VAE
+    'QuantumStateEncoder',
+    'QuantumStateDecoder',
+    'QuantumVAE',
+    'prepare_quantum_state_batch',
+    'extract_quantum_states'
 ]

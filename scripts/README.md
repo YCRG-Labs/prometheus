@@ -1,148 +1,115 @@
 # Prometheus Pipeline Scripts
 
-This directory contains the executable scripts for running the Prometheus pipeline stages.
+This directory contains executable scripts for the Prometheus quantum phase discovery pipeline.
 
-## Scripts Overview
+## Recreation Scripts
 
-### Individual Stage Scripts
+These scripts recreate all results from each version of the project:
 
-1. **`generate_data.py`** - Data generation and preprocessing
-   - Generates Ising model configurations across temperature ranges
-   - Preprocesses data into HDF5 format for training
-   - Supports parallel processing and validation
-
-2. **`train_vae.py`** - VAE model training
-   - Trains Convolutional VAE on Ising model data
-   - Supports checkpointing, early stopping, and resumption
-   - Configurable hyperparameters and training callbacks
-
-3. **`analyze_latent_space.py`** - Post-training analysis
-   - Encodes data into latent space using trained VAE
-   - Discovers order parameters and detects phase transitions
-   - Performs clustering and correlation analysis
-
-4. **`generate_visualizations.py`** - Visualization generation
-   - Creates publication-ready figures and plots
-   - Generates analysis reports and figure indices
-   - Supports multiple output formats (PNG, PDF, SVG)
-
-### Pipeline Orchestration
-
-5. **`run_prometheus_pipeline.py`** - Complete pipeline orchestrator
-   - Runs the full end-to-end pipeline
-   - Supports state management and resumption
-   - Handles error recovery and dependency checking
-
-6. **`validate_pipeline.py`** - Configuration validation utility
-   - Validates pipeline configuration files
-   - Checks system dependencies and requirements
-   - Provides detailed error reporting
-
-## Usage Examples
-
-### Run Individual Stages
-
+### 2D Ising Model (Original Prometheus)
 ```bash
-# Generate data
-python scripts/generate_data.py --config config/default_config.yaml --output-dir data --parallel
-
-# Train VAE
-python scripts/train_vae.py --data data/processed_dataset.h5 --config config/default_config.yaml
-
-# Analyze latent space
-python scripts/analyze_latent_space.py --model models/final_model.pth --data data/processed_dataset.h5
-
-# Generate visualizations
-python scripts/generate_visualizations.py --analysis-results results/analysis_results.json --detailed-data results/detailed_analysis.npz
+python scripts/recreate_2d_ising_results.py          # Full recreation
+python scripts/recreate_2d_ising_results.py --quick  # Quick validation
 ```
 
-### Run Complete Pipeline
-
+### 3D Ising Model (Validation Extension)
 ```bash
-# Run full pipeline
+python scripts/recreate_3d_ising_results.py          # Full recreation
+python scripts/recreate_3d_ising_results.py --quick  # Quick validation
+```
+
+### Quantum Discovery Campaign (DTFIM)
+```bash
+python scripts/recreate_quantum_discovery_results.py          # Standard mode
+python scripts/recreate_quantum_discovery_results.py --quick  # Quick validation
+python scripts/recreate_quantum_discovery_results.py --full   # Publication quality
+```
+
+---
+
+## Core Scripts
+
+### Data Generation
+- `generate_data.py` - Generate Ising model configurations
+- `generate_3d_ising_dataset.py` - Generate 3D Ising datasets
+- `generate_vae_training_data.py` - Prepare VAE training data
+- `generate_potts_dataset.py` - Generate Potts model data
+- `generate_xy_dataset.py` - Generate XY model data
+
+### VAE Training
+- `train_vae.py` - Train VAE model
+- `train_3d_vae.py` - Train 3D VAE
+- `train_enhanced_vae.py` - Train enhanced VAE with physics loss
+- `train_physics_informed_2d_vae.py` - Physics-informed 2D VAE
+- `train_physics_informed_3d_vae.py` - Physics-informed 3D VAE
+
+### Analysis
+- `analyze_latent_space.py` - Latent space analysis
+- `extract_2d_critical_exponents.py` - 2D critical exponent extraction
+- `extract_3d_critical_exponents.py` - 3D critical exponent extraction
+- `extract_3d_latent_representations.py` - Extract latent representations
+- `detect_3d_critical_temperature.py` - Critical temperature detection
+
+### Pipeline & Validation
+- `run_prometheus_pipeline.py` - Full pipeline orchestration
+- `validate_pipeline.py` - Configuration validation
+- `run_minimal_validation.py` - Quick validation
+- `run_accuracy_validation_pipeline.py` - Accuracy validation
+- `validate_multi_system.py` - Multi-system validation
+- `validate_on_real_monte_carlo.py` - Monte Carlo validation
+- `validate_prometheus_across_all_systems.py` - Cross-system validation
+
+### Task Scripts (Quantum Discovery Campaign)
+- `run_task10_dtfim_refinement.py` - DTFIM anomaly refinement
+- `run_task11_dtfim_characterization.py` - DTFIM characterization
+- `run_task12_secondary_refinement.py` - Secondary system refinement
+- `run_month2_decision_point.py` - Month 2 decision analysis
+- `run_task14_finite_size_scaling.py` - Finite-size scaling
+- `run_task15_critical_exponents.py` - Critical exponent extraction
+- `run_task16_entanglement_analysis.py` - Entanglement analysis
+- `run_task17_cross_validation.py` - Cross-validation
+- `run_task18_month3_decision.py` - Month 3 decision point
+- `run_task19_physical_explanation.py` - Physical explanation
+- `run_task20_experimental_relevance.py` - Experimental relevance
+- `run_task21_nature_figures.py` - Publication figures
+
+### Publication
+- `create_data_repository.py` - Create data repository for publication
+- `generate_publication_materials.py` - Generate publication materials
+- `generate_main_results_figure.py` - Main results figure
+- `generate_baseline_comparison_figure.py` - Baseline comparison
+- `generate_campaign_overview_figures.py` - Campaign overview
+- `generate_final_results_summary.py` - Final results summary
+- `generate_graphical_abstract.py` - Graphical abstract
+- `final_publication_validation.py` - Final validation for publication
+
+### Utilities
+- `inspect_h5.py` - Inspect HDF5 files
+- `generate_visualizations.py` - Generate visualizations
+
+## Usage
+
+### Run Full Pipeline
+```bash
 python scripts/run_prometheus_pipeline.py --config config/default_config.yaml
-
-# Resume interrupted pipeline
-python scripts/run_prometheus_pipeline.py --resume
-
-# Run specific stages
-python scripts/run_prometheus_pipeline.py --stages data_generation vae_training
-
-# Force re-run stages
-python scripts/run_prometheus_pipeline.py --force data_generation --stages data_generation vae_training
-
-# Check pipeline status
-python scripts/run_prometheus_pipeline.py --status
 ```
 
-### Validate Configuration
-
+### Run Specific Task
 ```bash
-# Validate configuration file
-python scripts/validate_pipeline.py --config config/my_config.yaml --check-deps --verbose
-
-# Validate default configuration
-python scripts/validate_pipeline.py --check-deps
+python scripts/run_task21_nature_figures.py
 ```
 
-## Configuration
-
-All scripts use the same configuration system based on YAML files. See `config/default_config.yaml` for the complete configuration structure.
-
-Key configuration sections:
-- `ising`: Ising model simulation parameters
-- `vae`: VAE architecture parameters  
-- `training`: Training pipeline parameters
-- `logging`: Logging configuration
-
-## Pipeline State Management
-
-The pipeline orchestrator maintains state in `.prometheus_pipeline_state.json` to support:
-- Resumption after interruption
-- Skipping completed stages
-- Error recovery and retry
-- Progress tracking
-
-## Error Handling
-
-All scripts include comprehensive error handling:
-- Configuration validation before execution
-- Dependency checking and verification
-- Graceful failure with informative error messages
-- State preservation for recovery
+### Generate Publication Materials
+```bash
+python scripts/create_data_repository.py
+python scripts/generate_publication_materials.py
+```
 
 ## Output Structure
 
-The pipeline creates the following output structure:
-
 ```
-data/                    # Generated and preprocessed data
-├── raw_configurations/  # Raw simulation data
-└── processed_dataset.h5 # Preprocessed training data
-
-models/                  # Trained models and checkpoints
-├── final_model.pth     # Final trained VAE model
-├── checkpoints/        # Training checkpoints
-└── training_history.json
-
-results/                 # Analysis results and visualizations
-├── analysis_results.json    # Quantitative analysis results
-├── detailed_analysis.npz    # Detailed data arrays
-├── latent_space.png        # Latent space visualization
-├── order_parameter.png     # Order parameter plot
-├── phase_diagram.png       # Phase diagram
-├── analysis_report.md      # Comprehensive report
-└── figure_index.md         # Figure index
+data/           # Generated datasets
+models/         # Trained models
+results/        # Analysis results
+publication/    # Publication materials
 ```
-
-## Requirements
-
-- Python 3.8+
-- PyTorch
-- NumPy, SciPy, scikit-learn
-- Matplotlib
-- h5py
-- PyYAML
-- tqdm
-
-Run `python scripts/validate_pipeline.py --check-deps` to verify all dependencies are installed.

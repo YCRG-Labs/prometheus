@@ -38,6 +38,14 @@ from .publication_figure_generator import (
     PublicationPackage
 )
 
+# Quantum phase transition detection
+from .quantum_phase_detection import (
+    QuantumPhaseDetector,
+    CriticalExponentExtractor,
+    QCPDetectionResult,
+    CriticalExponents
+)
+
 # Enhanced validation types and interfaces
 from .enhanced_validation_types import (
     # Exception classes
@@ -111,6 +119,12 @@ __all__ = [
     'PowerLawFitResult',
     'CriticalExponentResults',
     'create_critical_exponent_analyzer',
+    
+    # Quantum phase transition detection
+    'QuantumPhaseDetector',
+    'CriticalExponentExtractor',
+    'QCPDetectionResult',
+    'CriticalExponents',
     
     # Publication materials generation
     'SystematicComparisonFramework',
