@@ -8,7 +8,7 @@ Code associated with:
 ``` bibtex
 @article{AuthorYear,
   author       = {Yee, Brandon and Collins, Wilson and Rutkowski, Maximilian},
-  title        = {Prometheus: Uncovering Quantum Critical Behavior in Disordered Transverse Field Ising Chains},
+  title        = {From Classical to Quantum: Extending Prometheus to Uncover Quantum Critical Behavior in Disordered Transverse Field Ising Chains},
   journal      = {Research Square},
   year         = {2025},
   note         = {Preprint},
@@ -31,12 +31,12 @@ Citation:
 ``` bibtex
 @article{AuthorYear,
   author       = {Yee, Brandon and Collins, Wilson and Rutkowski, Maximilian},
-  title        = {From Classical to Quantum: Extending Prometheus to 3D Systems and Disordered Quantum Spin Chains},
+  title        = {Prometheus: Unsupervised Discovery of Phase Transitions in Three-Dimensional Spin Systems Using Variational Autoencoders},
   journal      = {Research Square},
   year         = {2025},
   note         = {Preprint},
-  doi          = {10.21203/rs.3.rs-xxxxxx/v1},
-  url          = {https://doi.org/10.21203/rs.3.rs-xxxxxx/v1}
+  doi          = {10.21203/rs.3.rs-8245732/v1},
+  url          = {https://doi.org/10.21203/rs.3.rs-8245732/v1}
 }
 ```
 
