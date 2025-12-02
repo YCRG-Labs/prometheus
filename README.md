@@ -29,7 +29,7 @@ Available at:
 Citation:
 
 ``` bibtex
-@article{AuthorYear,
+@article{3DPrometheusYee2026,
   author       = {Yee, Brandon and Collins, Wilson and Rutkowski, Maximilian},
   title        = {Prometheus: Unsupervised Discovery of Phase Transitions in Three-Dimensional Spin Systems Using Variational Autoencoders},
   journal      = {Research Square},
